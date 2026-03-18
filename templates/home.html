@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .img-bg {
+        background-image: url("{{ url_for('static', filename='img/hero/hero-5/hero-bg.svg') }}");
+        background-size: cover;
+        background-position: center;
+    }  >
+</style>
+<!-- Hero Section with Wave Background -->
+<section id="home" class="hero-section-wrapper-5">
+  <div class="hero-section hero-style-5 img-bg">
+    <div class="container pt-2 pb-4">
+      <div class="row align-items-center">
+
+        <!-- Left Column: Text -->
+        <div class="col-lg-6 col-md-12">
+          <div class="hero-content-wrapper">
+            <h1 class="display-5 fw-bold mb-4 wow fadeInUp" data-wow-delay=".2s">
+              Welcome to Mass Salary Prediction
+            </h1>
+            <p class="lead text-muted mb-4 wow fadeInUp" data-wow-delay=".4s">
+              Explore predictive models, visualize workforce trends, and manage your salary forecasts with ease.
+            </p>
+            <div class="d-flex gap-3 wow fadeInUp" data-wow-delay=".6s">
+              <a href="/predict" class="btn btn-primary btn-lg rounded-pill px-4">
+                <i class="lni lni-calculator me-2"></i>Try Prediction
+              </a>
+              <a href="/dashboard" class="btn btn-outline-primary btn-lg rounded-pill px-4">
+                <i class="lni lni-dashboard me-2"></i>Dashboard
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Image -->
+        <div class="col-lg-6 col-md-12 text-center wow fadeInUp" data-wow-delay=".5s">
+          <img src="{{ url_for('static', filename='img/hero/hero-5/hero-img.svg') }}" alt="Hero Illustration" class="img-fluid rounded shadow-sm" style="max-height: 350px;">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Feature Highlights -->
+<section class="py-5 shadow-sm" >
+  <div class="container">
+    <div class="row text-center">
+      <div class="col-md-4 wow fadeInUp" data-wow-delay=".2s">
+        <i class="lni lni-calculator display-4 text-primary mb-3"></i>
+        <h5>Accurate Models</h5>
+        <p class="text-muted">Leverage machine learning algorithms for precise salary predictions.</p>
+      </div>
+      <div class="col-md-4 wow fadeInUp" data-wow-delay=".4s">
+        <i class="lni lni-stats-up display-4 text-success mb-3"></i>
+        <h5>Interactive Graphs</h5>
+        <p class="text-muted">Visualize workforce trends with dynamic charts and insights.</p>
+      </div>
+      <div class="col-md-4 wow fadeInUp" data-wow-delay=".6s">
+        <i class="lni lni-files display-4 text-warning mb-3"></i>
+        <h5>Prediction History</h5>
+        <p class="text-muted">Track and review past predictions for better decision-making.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

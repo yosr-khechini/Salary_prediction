@@ -1,0 +1,636 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4" style="color: #2c3e50; font-weight: bold;">
+        <i class="lni lni-stats-up"></i> Data Dashboard
+    </h1>
+
+    <!-- Summary Cards -->
+    <!--<div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary shadow">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Data Points</h5>
+                    <h2 class="card-text">{{ total_records }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success shadow">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Max Employees</h5>
+                    <h2 class="card-text">{{ max_employees }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning shadow">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Recruitments</h5>
+                    <h2 class="card-text">{{ total_recruitments }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger shadow">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Departures</h5>
+                    <h2 class="card-text">{{ total_departures }}</h2>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Full Width Chart - Salary vs Employees Comparison (TOP) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow chart-card" onclick="openChartModal('combinedChart')">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #5ee7df 0%, #b490ca 100%); color: white;">
+                    <h5 class="mb-0"><i class="lni lni-graph"></i> Salary vs Employees Comparison <span class="expand-hint"><i class="lni lni-full-screen"></i></span></h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="combinedChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow chart-card" onclick="openChartModal('salaryChart')">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="mb-0"><i class="lni lni-money-location"></i> Mass Salary Over Time <span class="expand-hint"><i class="lni lni-full-screen"></i></span></h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow chart-card" onclick="openChartModal('employeesChart')">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                    <h5 class="mb-0"><i class="lni lni-users"></i> Number of Employees Over Time <span class="expand-hint"><i class="lni lni-full-screen"></i></span></h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="employeesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow chart-card" onclick="openChartModal('departuresChart')">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <h5 class="mb-0"><i class="lni lni-exit-down"></i> Monthly Departures <span class="expand-hint"><i class="lni lni-full-screen"></i></span></h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="departuresChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow chart-card" onclick="openChartModal('recruitmentsChart')">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                    <h5 class="mb-0"><i class="lni lni-enter"></i> Yearly Recruitments <span class="expand-hint"><i class="lni lni-full-screen"></i></span></h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="recruitmentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3 -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow chart-card" onclick="openChartModal('avgSalaryChart')">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                    <h5 class="mb-0"><i class="lni lni-pie-chart"></i> Average Salary by Year <span class="expand-hint"><i class="lni lni-full-screen"></i></span></h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="avgSalaryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Expanded Chart View -->
+<div id="chartModal" class="chart-modal" onclick="closeChartModal(event)">
+    <div class="chart-modal-content" onclick="event.stopPropagation()">
+        <span class="chart-modal-close" onclick="closeChartModal()">&times;</span>
+        <canvas id="modalChart"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js Local Files - No Internet Required -->
+<script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chartjs-plugin-datalabels.min.js') }}"></script>
+
+<script>
+    // Data from backend
+    const salaryData = {{ salary_data | safe }};
+    const employeesData = {{ employees_data | safe }};
+    const departuresData = {{ departures_data | safe }};
+    const recruitmentsData = {{ recruitments_data | safe }};
+
+    // Color palettes
+    const colors = {
+        blue: 'rgba(54, 162, 235, 1)',
+        blueBg: 'rgba(54, 162, 235, 0.3)',
+        red: 'rgba(255, 99, 132, 1)',
+        redBg: 'rgba(255, 99, 132, 0.3)',
+        green: 'rgba(75, 192, 192, 1)',
+        greenBg: 'rgba(75, 192, 192, 0.3)',
+        orange: 'rgba(255, 159, 64, 1)',
+        orangeBg: 'rgba(255, 159, 64, 0.3)',
+        purple: 'rgba(153, 102, 255, 1)',
+        purpleBg: 'rgba(153, 102, 255, 0.3)',
+        yellow: 'rgba(255, 205, 86, 1)',
+        yellowBg: 'rgba(255, 205, 86, 0.3)',
+        pink: 'rgba(255, 99, 255, 1)',
+        pinkBg: 'rgba(255, 99, 255, 0.3)',
+        teal: 'rgba(0, 206, 209, 1)',
+        tealBg: 'rgba(0, 206, 209, 0.3)'
+    };
+
+    // Gradient color arrays for bar charts
+    const rainbowColors = [
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+        'rgba(255, 205, 86, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 99, 255, 0.8)',
+        'rgba(201, 203, 207, 0.8)',
+        'rgba(0, 206, 209, 0.8)',
+        'rgba(144, 238, 144, 0.8)',
+        'rgba(255, 182, 193, 0.8)'
+    ];
+
+    const rainbowBorders = [
+        'rgba(255, 99, 132, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(255, 205, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 99, 255, 1)',
+        'rgba(201, 203, 207, 1)',
+        'rgba(0, 206, 209, 1)',
+        'rgba(144, 238, 144, 1)',
+        'rgba(255, 182, 193, 1)'
+    ];
+
+    // Store chart configurations for modal
+    const chartConfigs = {};
+    let modalChart = null;
+
+    // Modal functions
+    function openChartModal(chartId) {
+        const modal = document.getElementById('chartModal');
+        const modalCanvas = document.getElementById('modalChart');
+
+        // Destroy existing modal chart if any
+        if (modalChart) {
+            modalChart.destroy();
+        }
+
+        // Get the config for this chart and create a new one in modal
+        const config = chartConfigs[chartId];
+        if (config) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            // Create new chart in modal with same config
+            modalChart = new Chart(modalCanvas, JSON.parse(JSON.stringify(config)));
+        }
+    }
+
+    function closeChartModal(event) {
+        const modal = document.getElementById('chartModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+
+        if (modalChart) {
+            modalChart.destroy();
+            modalChart = null;
+        }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeChartModal();
+        }
+    });
+
+    // 1. Mass Salary Chart
+    chartConfigs['salaryChart'] = {
+        type: 'line',
+        data: {
+            labels: salaryData.labels,
+            datasets: [{
+                label: 'Mass Salary (MAD)',
+                data: salaryData.values,
+                borderColor: colors.purple,
+                backgroundColor: colors.purpleBg,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: colors.purple,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: { size: 14, weight: 'bold' },
+                        color: '#333',
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Monthly Mass Salary Trend',
+                    font: { size: 16 }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    };
+    new Chart(document.getElementById('salaryChart'), chartConfigs['salaryChart']);
+
+    // 2. Employees Chart
+    chartConfigs['employeesChart'] = {
+        type: 'line',
+        data: {
+            labels: employeesData.labels,
+            datasets: [{
+                label: 'Number of Employees',
+                data: employeesData.values,
+                borderColor: colors.green,
+                backgroundColor: colors.greenBg,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: colors.green,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: { size: 14, weight: 'bold' },
+                        color: '#333',
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Monthly Employee Count Trend',
+                    font: { size: 16 }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    };
+    new Chart(document.getElementById('employeesChart'), chartConfigs['employeesChart']);
+
+    // 3. Departures Chart
+    chartConfigs['departuresChart'] = {
+        type: 'bar',
+        data: {
+            labels: departuresData.labels,
+            datasets: [{
+                label: 'Monthly Departures',
+                data: departuresData.values,
+                backgroundColor: rainbowColors.slice(0, departuresData.values.length % 11 || 11).concat(
+                    ...Array(Math.floor(departuresData.values.length / 11)).fill(rainbowColors).flat()
+                ).slice(0, departuresData.values.length),
+                borderColor: colors.red,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: { size: 14, weight: 'bold' },
+                        color: '#333',
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Employee Departures Per Month',
+                    font: { size: 16 }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    };
+    new Chart(document.getElementById('departuresChart'), chartConfigs['departuresChart']);
+
+    // 4. Recruitments Chart (Doughnut)
+    chartConfigs['recruitmentsChart'] = {
+        type: 'doughnut',
+        data: {
+            labels: recruitmentsData.labels,
+            datasets: [{
+                label: 'Recruitments by Year',
+                data: recruitmentsData.values,
+                backgroundColor: rainbowColors.slice(0, recruitmentsData.values.length),
+                borderColor: rainbowBorders.slice(0, recruitmentsData.values.length),
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        font: { size: 12, weight: 'bold' },
+                        color: '#333',
+                        usePointStyle: true,
+                        padding: 15
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Recruitments Distribution by Year',
+                    font: { size: 16 }
+                }
+            }
+        }
+    };
+    new Chart(document.getElementById('recruitmentsChart'), chartConfigs['recruitmentsChart']);
+
+    // 5. Average Salary by Year (Polar Area)
+    const avgSalaryByYear = {{ avg_salary_by_year | safe }};
+    chartConfigs['avgSalaryChart'] = {
+        type: 'polarArea',
+        data: {
+            labels: avgSalaryByYear.labels,
+            datasets: [{
+                label: 'Average Salary',
+                data: avgSalaryByYear.values,
+                backgroundColor: rainbowColors.slice(0, avgSalaryByYear.values.length),
+                borderColor: rainbowBorders.slice(0, avgSalaryByYear.values.length),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        font: { size: 11, weight: 'bold' },
+                        color: '#333',
+                        usePointStyle: true
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Average Salary by Year (MAD)',
+                    font: { size: 16 }
+                }
+            }
+        }
+    };
+    new Chart(document.getElementById('avgSalaryChart'), chartConfigs['avgSalaryChart']);
+
+    // 6. Combined Chart (Salary vs Employees)
+    chartConfigs['combinedChart'] = {
+        type: 'line',
+        data: {
+            labels: salaryData.labels,
+            datasets: [
+                {
+                    label: 'Mass Salary (MAD) - Scaled /1000',
+                    data: salaryData.values.map(v => v / 1000),
+                    borderColor: colors.orange,
+                    backgroundColor: colors.orangeBg,
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'y',
+                    pointBackgroundColor: colors.orange,
+                    pointRadius: 2
+                },
+                {
+                    label: 'Number of Employees',
+                    data: employeesData.values,
+                    borderColor: colors.teal,
+                    backgroundColor: colors.tealBg,
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'y1',
+                    pointBackgroundColor: colors.teal,
+                    pointRadius: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: { size: 14, weight: 'bold' },
+                        color: '#333',
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Salary vs Employee Count Comparison Over Time',
+                    font: { size: 18 }
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Salary (thousands MAD)',
+                        font: { size: 12, weight: 'bold' }
+                    },
+                    grid: { color: 'rgba(255, 159, 64, 0.2)' }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Number of Employees',
+                        font: { size: 12, weight: 'bold' }
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    };
+    new Chart(document.getElementById('combinedChart'), chartConfigs['combinedChart']);
+</script>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        font-weight: bold;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    canvas {
+        max-height: 350px;
+    }
+    h1 i {
+        margin-right: 10px;
+    }
+
+    /* Chart card clickable styles */
+    .chart-card {
+        cursor: pointer;
+        position: relative;
+    }
+    .chart-card:hover {
+        transform: translateY(-5px) scale(1.01);
+    }
+    .expand-hint {
+        float: right;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .chart-card:hover .expand-hint {
+        opacity: 1;
+    }
+
+    /* Modal styles */
+    .chart-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        animation: fadeIn 0.3s ease;
+    }
+    .chart-modal.show {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .chart-modal-content {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 20px;
+        width: 90vw;
+        height: 85vh;
+        max-width: 1400px;
+        position: relative;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: scaleIn 0.3s ease;
+    }
+    .chart-modal-close {
+        position: absolute;
+        top: 15px;
+        right: 25px;
+        font-size: 35px;
+        font-weight: bold;
+        color: #666;
+        cursor: pointer;
+        transition: color 0.3s ease, transform 0.3s ease;
+        z-index: 10000;
+    }
+    .chart-modal-close:hover {
+        color: #e74c3c;
+        transform: scale(1.2);
+    }
+    #modalChart {
+        max-height: none !important;
+        height: calc(100% - 20px) !important;
+        width: 100% !important;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+</style>
+{% endblock %}

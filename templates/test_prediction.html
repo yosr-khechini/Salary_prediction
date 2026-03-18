@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Test Model - Historical Data{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Test Model Against Historical Data</h1>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Model Accuracy Test</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">
+                Click the button below to test the model against all historical years (2010-2020).
+                The model will predict mass salary for each year using the same inputs (employees, recruitments, departures)
+                and compare with the actual values. The average error calculated here is used to improve future predictions.
+            </p>
+            <form id="testForm">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="lni lni-stats-up"></i> Run Test on All Historical Years
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="text-center mt-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Testing all years... This may take a moment.</p>
+    </div>
+
+    <div id="errorAlert" class="alert alert-danger mt-4" style="display: none;"></div>
+
+    <div id="testResults" class="mt-4" style="display: none;">
+        <!-- Overall Metrics -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Overall Model Performance</h5>
+            </div>
+            <div class="card-body">
+                <div id="testMetrics" class="row"></div>
+                <div id="avgErrorMessage" class="alert alert-info mt-3" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Year-by-Year Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Year-by-Year Comparison</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Year</th>
+                                <th>Employees (avg)</th>
+                                <th>Recruitments</th>
+                                <th>Departures</th>
+                                <th>Actual Mass Salary</th>
+                                <th>Predicted Mass Salary</th>
+                                <th>Difference</th>
+                                <th>Error %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testTable"></tbody>
+                        <tfoot class="table-secondary" id="testTableFooter"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testForm = document.getElementById('testForm');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const errorAlert = document.getElementById('errorAlert');
+    const testResults = document.getElementById('testResults');
+    const testMetrics = document.getElementById('testMetrics');
+    const testTable = document.getElementById('testTable');
+    const testTableFooter = document.getElementById('testTableFooter');
+    const avgErrorMessage = document.getElementById('avgErrorMessage');
+
+    // Format number with thousands separator (no currency symbol)
+    const formatNumber = (num) => {
+        return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    testForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Reset UI
+        loadingSpinner.style.display = 'block';
+        errorAlert.style.display = 'none';
+        testResults.style.display = 'none';
+
+        try {
+            const response = await fetch('/prediction/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'error') {
+                throw new Error(data.message || 'An error occurred');
+            }
+
+            // Display metrics cards
+            testMetrics.innerHTML = `
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-primary text-white h-100">
+                        <div class="card-body text-center">
+                            <h6>Years Tested</h6>
+                            <h2>${data.metrics.num_years}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-warning h-100">
+                        <div class="card-body text-center">
+                            <h6>Average Absolute Error</h6>
+                            <h4>${formatNumber(data.metrics.mae)}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-danger text-white h-100">
+                        <div class="card-body text-center">
+                            <h6>Average Percentage Error (MAPE)</h6>
+                            <h2>${data.metrics.mape.toFixed(2)}%</h2>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show average error message
+            avgErrorMessage.innerHTML = `<strong>Note:</strong> ${data.metrics.avg_error_message}`;
+            avgErrorMessage.style.display = 'block';
+
+            // Display table rows
+            testTable.innerHTML = '';
+            let totalActual = 0;
+            let totalPredicted = 0;
+
+            data.results.forEach(row => {
+                totalActual += row.actual;
+                totalPredicted += row.predicted;
+
+                // Color code based on error percentage
+                let errorClass = '';
+                if (row.error_percent < 5) errorClass = 'text-success';
+                else if (row.error_percent < 10) errorClass = 'text-warning';
+                else errorClass = 'text-danger';
+
+                // Color for difference (positive = green, negative = red)
+                let diffClass = row.difference >= 0 ? 'text-success' : 'text-danger';
+                let diffSign = row.difference >= 0 ? '+' : '';
+
+                testTable.innerHTML += `
+                    <tr>
+                        <td><strong>${row.year}</strong></td>
+                        <td>${row.employees.toLocaleString()}</td>
+                        <td>${row.recruitments}</td>
+                        <td>${row.departures}</td>
+                        <td>${formatNumber(row.actual)}</td>
+                        <td>${formatNumber(row.predicted)}</td>
+                        <td class="${diffClass}">${diffSign}${formatNumber(row.difference)}</td>
+                        <td class="${errorClass}"><strong>${row.error_percent.toFixed(2)}%</strong></td>
+                    </tr>
+                `;
+            });
+
+            // Calculate totals
+            const totalDiff = totalPredicted - totalActual;
+            const totalErrorPercent = (Math.abs(totalDiff) / totalActual) * 100;
+
+            // Display footer with totals and averages
+            testTableFooter.innerHTML = `
+                <tr class="table-dark">
+                    <th>TOTAL</th>
+                    <th>-</th>
+                    <th>-</th>
+                    <th>-</th>
+                    <th>${formatNumber(totalActual)}</th>
+                    <th>${formatNumber(totalPredicted)}</th>
+                    <th>${totalDiff >= 0 ? '+' : ''}${formatNumber(totalDiff)}</th>
+                    <th>${totalErrorPercent.toFixed(2)}%</th>
+                </tr>
+                <tr class="table-info">
+                    <th>AVERAGE</th>
+                    <th>-</th>
+                    <th>-</th>
+                    <th>-</th>
+                    <th>${formatNumber(totalActual / data.results.length)}</th>
+                    <th>${formatNumber(totalPredicted / data.results.length)}</th>
+                    <th>${(totalDiff / data.results.length) >= 0 ? '+' : ''}${formatNumber(totalDiff / data.results.length)}</th>
+                    <th><strong>${data.metrics.mape.toFixed(2)}%</strong></th>
+                </tr>
+            `;
+
+            testResults.style.display = 'block';
+
+        } catch (error) {
+            errorAlert.textContent = error.message;
+            errorAlert.style.display = 'block';
+        } finally {
+            loadingSpinner.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}
+

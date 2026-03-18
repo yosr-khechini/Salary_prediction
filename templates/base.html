@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mass Salary Prediction - INSAF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.svg') }}">
+
+  <!-- Local Bootstrap CSS (works offline) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.0-beta1.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/glightbox.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/lindy-uikit.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/LineIcons.2.0.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tiny-slider.css') }}">
+</head>
+<body>
+<style>
+  body {
+    background-image: url('{{ url_for('static', filename='img/hero/hero-5/hero-bg.svg') }}');
+    background-size: cover;
+    background-position: center;
+  }
+  .hero-section-wrapper-5 .hero-style-5 {
+        padding: 20px 0 40px !important;
+    }
+  .hero-section-wrapper-5 .hero-style-5 .hero-content-wrapper {
+        padding: 20px 0 !important;
+    }
+</style>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg shadow-sm rounded-pill mt-4 mx-4 px-4 py-2">
+  <div class="container-fluid">
+
+    <!-- Title -->
+    <a class="navbar-brand fw-bold fs-5 text-primary" href="{{ url_for('main.home') if current_user.is_authenticated else url_for('main.index') }}">
+      Mass Salary Prediction
+    </a>
+
+    <!-- Toggler for mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Links -->
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      {% if current_user.is_authenticated %}
+      <ul class="navbar-nav gap-2 align-items-center">
+        <li class="nav-item">
+          <a class="nav-link btn btn-outline-primary rounded-pill px-3 py-1" href="/dashboard">
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link btn btn-outline-primary rounded-pill px-3 py-1" href="{{ url_for('employees.list_employees') }}">
+            Employees
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link btn btn-outline-primary rounded-pill px-3 py-1" href="{{ url_for('main.predict') }}">
+            Predict
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link btn btn-outline-primary rounded-pill px-3 py-1" href="/history">
+            History
+          </a>
+        </li>
+
+        <!-- User Dropdown -->
+        <li class="nav-item dropdown ms-2">
+          <a class="nav-link btn btn-primary rounded-pill px-3 py-1 dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Hello, {{ current_user.username }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown" style="border-radius: 15px;">
+            <li>
+              <a class="dropdown-item py-2" href="{{ url_for('main.profile') }}">
+                <i class="lni lni-user me-2"></i>Profile
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form method="POST" action="{{ url_for('auth.logout') }}" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="dropdown-item py-2 text-danger" type="submit">
+                  <i class="lni lni-exit me-2"></i>Logout
+                </button>
+              </form>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      {% else %}
+      <ul class="navbar-nav gap-2">
+        <li class="nav-item">
+          <a class="nav-link btn btn-outline-danger rounded-pill px-4 py-1" href="{{ url_for('auth.login') }}">
+            Login
+          </a>
+        </li>
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<!-- Page Content -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="{{ url_for('static', filename='js/bootstrap-5.0.0-beta1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/wow.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/glightbox.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tiny-slider.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

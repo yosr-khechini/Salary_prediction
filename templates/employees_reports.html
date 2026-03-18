@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+  <h1 class="display-5 fw-bold mb-4">Employee Reports by Year</h1>
+
+  <!-- Year selector -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="GET">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <select name="year" class="form-select" onchange="this.form.submit()">
+              <option value="">Select Year</option>
+              {% for year in available_years %}
+              <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
+              {% endfor %}
+            </select>
+          </div></div>
+      </form>
+    </div>
+  </div>
+
+  {% if selected_year %}
+  <!-- Recruitments Table -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+      <h3>Recruitments - {{ selected_year }}</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Matricule</th>
+              <th>Full Name</th>
+              <th>Day</th>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Department</th>
+              <th>Position</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if recruitments %}
+            {% for emp in recruitments %}
+            <tr>
+              <td>{{ emp.matricule }}</td>
+              <td>{{ emp.first_name }} {{ emp.last_name }}</td>
+              <td>{{ emp.day }}</td>
+              <td>{{ emp.month }}</td>
+              <td>{{ emp.year }}</td>
+              <td>{{ emp.departement or '-' }}</td>
+              <td>{{ emp.position or '-' }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">No recruitments in {{ selected_year }}</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terminations Table -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-danger text-white">
+      <h3>Terminations - {{ selected_year }}</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Matricule</th>
+              <th>Full Name</th>
+              <th>Day</th>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Department</th>
+              <th>Position</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if terminations %}
+            {% for emp in terminations %}
+            <tr>
+              <td>{{ emp.matricule }}</td>
+              <td>{{ emp.first_name }} {{ emp.last_name }}</td>
+              <td>{{ emp.day }}</td>
+              <td>{{ emp.month }}</td>
+              <td>{{ emp.year }}</td>
+              <td>{{ emp.departement or '-' }}</td>
+              <td>{{ emp.position or '-' }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">No terminations in {{ selected_year }}</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

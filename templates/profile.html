@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <!-- Profile Header Card -->
+      <div class="card border-0 shadow-lg mb-4" style="border-radius: 20px; overflow: hidden;">
+        <div class="card-header text-white py-4" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
+          <div class="d-flex align-items-center">
+            <div class="bg-white rounded-circle p-3 me-4" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+              <i class="lni lni-user text-primary" style="font-size: 2.5rem;"></i>
+            </div>
+            <div>
+              <h2 class="mb-1">Test Admin</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          <h5 class="text-muted mb-4"><i class="lni lni-information me-2"></i>Account Information</h5>
+
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="p-3 bg-light rounded-3">
+                <small class="text-muted d-block mb-1">Username</small>
+                <strong><i class="lni lni-user me-2 text-primary"></i>{{ username }}</strong>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 bg-light rounded-3">
+                <small class="text-muted d-block mb-1">Email</small>
+                <strong><i class="lni lni-envelope me-2 text-primary"></i>{{ email }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password Card -->
+      <div class="card border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="card-header bg-white py-3 border-0">
+          <h5 class="mb-0"><i class="lni lni-lock me-2 text-warning"></i>Change Password</h5>
+        </div>
+        <div class="card-body p-4">
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
+          <form method="POST" action="{{ url_for('main.change_password') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-3">
+              <label for="current_password" class="form-label">Current Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="lni lni-lock"></i></span>
+                <input type="password" class="form-control" id="current_password" name="current_password" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="new_password" class="form-label">New Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="lni lni-key"></i></span>
+                <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8">
+              </div>
+              <small class="text-muted">Minimum 8 characters</small>
+            </div>
+
+            <div class="mb-4">
+              <label for="confirm_password" class="form-label">Confirm New Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="lni lni-key"></i></span>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="8">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
+              <i class="lni lni-checkmark me-2"></i>Update Password
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

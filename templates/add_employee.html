@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h3 class="mb-0"><i class="lni lni-plus"></i> Add New Employee</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('employees.add_employee') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-3">
+              <!-- Personal Information -->
+              <div class="col-12">
+                <h5 class="border-bottom pb-2 text-primary"><i class="lni lni-user"></i> Personal Information</h5>
+              </div>
+
+              <div class="col-md-4">
+                <label for="matricule" class="form-label">Matricule *</label>
+                <input type="number" class="form-control" id="matricule" name="matricule" required>
+              </div>
+
+              <div class="col-md-4">
+                <label for="firstName" class="form-label">First Name (Prénom) *</label>
+                <input type="text" class="form-control" id="firstName" name="first_name" required>
+              </div>
+
+              <div class="col-md-4">
+                <label for="lastName" class="form-label">Last Name (Nom) *</label>
+                <input type="text" class="form-control" id="lastName" name="last_name" required>
+              </div>
+
+              <div class="col-md-4">
+                <label for="birth_date" class="form-label">Birth Date *</label>
+                <input type="date" class="form-control" id="birth_date" name="birth_date" required>
+              </div>
+
+              <div class="col-md-4">
+                <label for="situation_familiale" class="form-label">Family Status</label>
+                <select class="form-select" id="situation_familiale" name="situation_familiale">
+                  <option value="">-- Select --</option>
+                  <option value="Célibataire">Célibataire</option>
+                  <option value="Marié(e)">Marié(e)</option>
+                  <option value="Divorcé(e)">Divorcé(e)</option>
+                  <option value="Veuf(ve)">Veuf(ve)</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label for="nombre_enfants" class="form-label">Number of Children</label>
+                <input type="number" class="form-control" id="nombre_enfants" name="nombre_enfants" min="0" value="0">
+              </div>
+
+              <!-- Administrative Classification (INSAF) -->
+              <div class="col-12 mt-4">
+                <h5 class="border-bottom pb-2 text-primary"><i class="lni lni-certificate"></i> Administrative Classification</h5>
+              </div>
+
+              <div class="col-md-3">
+                <label for="grade" class="form-label">Grade *</label>
+                <select class="form-select" id="grade" name="grade" required>
+                  <option value="">-- Select --</option>
+                  <option value="A1">A1 - Cadre Supérieur</option>
+                  <option value="A2">A2 - Cadre</option>
+                  <option value="A3">A3 - Cadre Adjoint</option>
+                  <option value="B">B - Maîtrise</option>
+                  <option value="C">C - Exécution</option>
+                  <option value="D">D - Ouvrier</option>
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label for="echelon" class="form-label">Échelon</label>
+                <select class="form-select" id="echelon" name="echelon">
+                  <option value="">-- Select --</option>
+                  {% for i in range(1, 13) %}
+                  <option value="{{ i }}">{{ i }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label for="indice" class="form-label">Indice</label>
+                <input type="number" class="form-control" id="indice" name="indice" min="100" max="1000">
+              </div>
+
+              <div class="col-md-3">
+                <label for="corps" class="form-label">Corps</label>
+                <select class="form-select" id="corps" name="corps">
+                  <option value="">-- Select --</option>
+                  <option value="Administratif">Administratif</option>
+                  <option value="Technique">Technique</option>
+                  <option value="Paramédical">Paramédical</option>
+                  <option value="Enseignant">Enseignant</option>
+                  <option value="Ouvrier">Ouvrier</option>
+                </select>
+              </div>
+
+              <!-- Salary Information -->
+              <div class="col-12 mt-4">
+                <h5 class="border-bottom pb-2 text-primary"><i class="lni lni-coin"></i> Salary Components</h5>
+              </div>
+
+              <div class="col-md-4">
+                <label for="salaire_base" class="form-label">Salaire de Base (TND)</label>
+                <input type="number" class="form-control" id="salaire_base" name="salaire_base" step="0.01">
+              </div>
+
+              <div class="col-md-4">
+                <label for="indemnite_residence" class="form-label">Indemnité de Résidence</label>
+                <input type="number" class="form-control" id="indemnite_residence" name="indemnite_residence" step="0.01">
+              </div>
+
+              <div class="col-md-4">
+                <label for="indemnite_transport" class="form-label">Indemnité de Transport</label>
+                <input type="number" class="form-control" id="indemnite_transport" name="indemnite_transport" step="0.01">
+              </div>
+
+              <!-- Dates -->
+              <div class="col-12 mt-4">
+                <h5 class="border-bottom pb-2 text-primary"><i class="lni lni-calendar"></i> Employment Dates</h5>
+              </div>
+
+              <div class="col-md-6">
+                <label for="dateJoined" class="form-label">Recruitment Date</label>
+                <input type="date" class="form-control" id="dateJoined" name="date_joined">
+              </div>
+
+              <!--<div class="col-md-6">
+                <label for="dateTitularisation" class="form-label">Titularisation Date</label>
+                <input type="date" class="form-control" id="dateTitularisation" name="date_titularisation">
+              </div>-->
+
+              <!-- Buttons -->
+              <div class="col-12 mt-4">
+                <div class="d-flex gap-2 justify-content-end">
+                  <a href="{{ url_for('employees.list_employees') }}" class="btn btn-secondary rounded-pill px-4">
+                    <i class="lni lni-arrow-left"></i> Cancel
+                  </a>
+                  <button type="submit" class="btn btn-success rounded-pill px-4">
+                    <i class="lni lni-checkmark"></i> Add Employee
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

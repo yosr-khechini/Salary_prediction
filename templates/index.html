@@ -1,0 +1,60 @@
+<!-- html -->
+<!-- File: 'templates/index.html' -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>INSAF - Mass Salary Prediction</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.svg') }}">
+<!-- CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-5.0.0-beta1.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/glightbox.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/lindy-uikit.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/LineIcons.2.0.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tiny-slider.css') }}">
+</head>
+<body>
+<style>
+  body {
+    background-image: url('{{ url_for('static', filename='img/hero/hero-5/hero-bg.svg') }}');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+  }
+</style>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="container mt-4">
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    {% for message in messages %}
+    <p class="mb-0">{{ message }}</p>
+    {% endfor %}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="container d-flex flex-column justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="text-center">
+    <img src="{{ url_for('static', filename='img/about/about-4/about-img.svg') }}" alt="Illustration" class="img-fluid mb-4" style="max-height: 300px;">
+    <h1 class="display-5 fw-bold mb-3">INSAF Prediction System</h1>
+    <p class="lead text-muted mb-4">Mass Salary Prediction for Budget Planning</p>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-5 py-3 rounded-pill">
+      <i class="lni lni-lock me-2"></i>Admin Login
+    </a>
+  </div>
+</div>
+
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='js/bootstrap-5.0.0-beta1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/wow.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/glightbox.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tiny-slider.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

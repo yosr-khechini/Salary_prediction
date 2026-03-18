@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h2 class="text-center mb-4">Prediction History</h2>
+            <p class="text-muted text-center mb-4">
+              Review all your past salary predictions and their results. Click on a graph to view it larger.
+            </p>
+
+            {% if histories and histories|length > 0 %}
+              <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                  <thead class="table-primary">
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Start Year</th>
+                      <th scope="col">End Year</th>
+                      <th scope="col">Recruitments</th>
+                      <th scope="col">Departures</th>
+                      <th scope="col">Initial Employees</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Graph</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in histories %}
+                      <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ item.start_year }}</td>
+                        <td>{{ item.end_year }}</td>
+                        <td>{{ item.recruitments }}</td>
+                        <td>{{ item.departures }}</td>
+                        <td>{{ item.initial_employees }}</td>
+                        <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                          {% if item.result_data.graph %}
+                            <img src="{{ item.result_data.graph }}" alt="Graph"
+                                 class="img-thumbnail history-graph-thumb"
+                                 style="max-height:80px; cursor: pointer;"
+                                 onclick="openGraphModal('{{ item.result_data.graph }}')"
+                                 title="Click to enlarge">
+                          {% else %}
+                            <span class="text-muted">No graph</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="alert alert-info text-center">
+                No predictions have been made yet.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal for Graph Expansion -->
+<div id="graphModal" class="graph-modal" onclick="closeGraphModal(event)">
+    <div class="graph-modal-content" onclick="event.stopPropagation()">
+        <span class="graph-modal-close" onclick="closeGraphModal()">&times;</span>
+        <img id="modalGraphImage" src="" alt="Expanded Graph" style="max-width: 100%; max-height: 100%;">
+    </div>
+</div>
+
+<style>
+    .history-graph-thumb {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .history-graph-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .graph-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        animation: fadeIn 0.3s ease;
+    }
+    .graph-modal.show {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .graph-modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        width: 90vw;
+        height: 85vh;
+        max-width: 1400px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: scaleIn 0.3s ease;
+    }
+    .graph-modal-close {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 35px;
+        font-weight: bold;
+        color: #666;
+        cursor: pointer;
+        transition: color 0.3s ease, transform 0.3s ease;
+        z-index: 10000;
+    }
+    .graph-modal-close:hover {
+        color: #e74c3c;
+        transform: scale(1.2);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+</style>
+
+<script>
+    function openGraphModal(graphSrc) {
+        const modal = document.getElementById('graphModal');
+        const modalImage = document.getElementById('modalGraphImage');
+        modalImage.src = graphSrc;
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeGraphModal(event) {
+        const modal = document.getElementById('graphModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeGraphModal();
+        }
+    });
+</script>
+
+{% endblock %}

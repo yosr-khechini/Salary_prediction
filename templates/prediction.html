@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Payroll Prediction{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Payroll Prediction</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <form id="predictionForm">
+                <div class="mb-3">
+                    <label for="start_year" class="form-label">Start Year</label>
+                    <input type="number" class="form-control" id="start_year" name="start_year"
+                           placeholder="2025" min="2020" max="2100" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="end_year" class="form-label">End Year</label>
+                    <input type="number" class="form-control" id="end_year" name="end_year"
+                           placeholder="2030" min="2020" max="2100" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="recruitments" class="form-label">Recruitments per Year</label>
+                    <input type="number" class="form-control" id="recruitments" name="recruitments"
+                           placeholder="10" min="0" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="departures" class="form-label">Departures per Year</label>
+                    <input type="number" class="form-control" id="departures" name="departures"
+                           placeholder="5" min="0" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="initial_employees" class="form-label">Initial Number of Employees</label>
+                    <input type="number" class="form-control" id="initial_employees" name="initial_employees"
+                           placeholder="100" min="1" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Predict</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="text-center mt-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div id="errorAlert" class="alert alert-danger mt-4" style="display: none;"></div>
+
+    <div id="resultsSection" class="mt-4" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <h5>Prediction Results</h5>
+                <div id="modelMetrics" class="mt-2 text-muted" style="font-size: 0.95rem;"></div>
+            </div>
+            <div class="card-body">
+                <img id="graphImage" class="img-fluid" alt="Prediction Chart">
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Yearly Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Predicted Payroll </th>
+                                <th>Number of Employees</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictionsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/prediction.js') }}"></script>
+{% endblock %}
