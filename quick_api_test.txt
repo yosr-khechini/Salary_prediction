@@ -1,0 +1,17 @@
+INSAF Salary Prediction API - Quick Test (PowerShell)
+
+1) Start API:
+python run.py
+
+2) Set base URL:
+$BASE = "http://127.0.0.1:5000"
+
+3) Health check:
+curl.exe "$BASE/prediction/health"
+
+4) Metrics:
+curl.exe "$BASE/prediction/metrics"
+
+5) Prediction test:
+curl.exe -X POST "$BASE/prediction/predict" -H "Content-Type: application/json" -d '{"start_year":2021,"end_year":2025,"recruitments":120,"departures":80,"initial_employees":3200}'
+

@@ -1,0 +1,47 @@
+INSAF Salary Prediction API - curl Commands (PowerShell)
+
+1) Start the Flask app (in terminal 1):
+python run.py
+
+2) Use this base URL (in terminal 2):
+$BASE = "http://127.0.0.1:5000"
+
+3) Health and metrics:
+curl.exe "$BASE/prediction/health"
+curl.exe "$BASE/prediction/metrics"
+
+4) Predict (main endpoint):
+curl.exe -X POST "$BASE/prediction/predict" -H "Content-Type: application/json" -d '{"start_year":2021,"end_year":2025,"recruitments":120,"departures":80,"initial_employees":3200}'
+
+5) Predict (alias endpoint):
+curl.exe -X POST "$BASE/prediction/api/predict" -H "Content-Type: application/json" -d '{"start_year":2021,"end_year":2025,"recruitments":120,"departures":80,"initial_employees":3200}'
+
+6) Error case - no JSON body:
+curl.exe -X POST "$BASE/prediction/predict"
+
+7) Error case - missing fields:
+curl.exe -X POST "$BASE/prediction/predict" -H "Content-Type: application/json" -d '{"start_year":2021,"end_year":2025}'
+
+8) Error case - invalid numeric values:
+curl.exe -X POST "$BASE/prediction/predict" -H "Content-Type: application/json" -d '{"start_year":2021,"end_year":2025,"recruitments":"abc","departures":80,"initial_employees":3200}'
+
+9) Error case - end_year < start_year:
+curl.exe -X POST "$BASE/prediction/predict" -H "Content-Type: application/json" -d '{"start_year":2025,"end_year":2021,"recruitments":120,"departures":80,"initial_employees":3200}'
+
+10) Error case - invalid year / zero employees:
+curl.exe -X POST "$BASE/prediction/predict" -H "Content-Type: application/json" -d '{"start_year":1999,"end_year":2001,"recruitments":120,"departures":80,"initial_employees":0}'
+
+11) Optional authenticated test endpoint (/prediction/test):
+
+# Get login page and save cookies + HTML
+curl.exe -c cookies.txt "$BASE/login" -o login.html
+
+# Extract CSRF token from login.html (PowerShell)
+$csrf = (Select-String -Path .\login.html -Pattern 'name="csrf_token" value="([^"]+)"').Matches[0].Groups[1].Value
+
+# Login (replace YOUR_USERNAME / YOUR_PASSWORD)
+curl.exe -b cookies.txt -c cookies.txt -X POST "$BASE/login" -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "username=YOUR_USERNAME" --data-urlencode "password=YOUR_PASSWORD" --data-urlencode "csrf_token=$csrf" --data-urlencode "remember=on" -L
+
+# Call protected test endpoint
+curl.exe -b cookies.txt -X POST "$BASE/prediction/test"
+
